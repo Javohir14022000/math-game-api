@@ -77,23 +77,20 @@ export class RatingsService {
             },
         });
 
-        // Fetch user details for the aggregated ratings
-        return await Promise.all(
-            aggregatedRatings.map(async (rating, index) => {
-                const user = await this.prisma.user.findUnique({
-                    where: {id: rating.userId},
-                });
+        const userIds = aggregatedRatings.map((r) => r.userId);
+        const users = await this.prisma.user.findMany({
+            where: { id: { in: userIds } },
+        });
+        const userMap = new Map(users.map((u) => [u.id, u]));
 
-                return {
-                    userId: rating.userId,
-                    score: rating._sum.score,
-                    user: {
-                        ...user,
-                        ranking: index + 1,
-                    },
-                };
-            })
-        );
+        return aggregatedRatings.map((rating, index) => ({
+            userId: rating.userId,
+            score: rating._sum.score,
+            user: {
+                ...userMap.get(rating.userId),
+                ranking: index + 1,
+            },
+        }));
     }
 
     async saveNewRating(newRatingDto: NewRatingDto) {

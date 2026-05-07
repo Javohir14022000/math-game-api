@@ -13,11 +13,7 @@ export class UsersService {
       take: limit,
     });
 
-    users.map((user, index) => {
-      user.rating = index + 1;
-    });
-
-    return users;
+    return users.map((user, index) => ({ ...user, rating: index + 1 }));
   }
 
   async getUser(id: string) {
@@ -25,11 +21,8 @@ export class UsersService {
       orderBy: { coins: 'desc' },
     });
 
-    users.map((user, index) => {
-      user.rating = index + 1;
-    });
-
-    return users.find((user) => user.id === id);
+    const ranked = users.map((user, index) => ({ ...user, rating: index + 1 }));
+    return ranked.find((user) => user.id === id);
   }
 
   async updateUser(id: string, updateUserDto: Prisma.UserUpdateInput) {

@@ -17,22 +17,19 @@ export class AuthGuard implements CanActivate {
     if (!token) {
       throw new UnauthorizedException("Token doesn't exist");
     }
-    try {
-      const decoded = this.decodeToken(token);
-      if (!decoded)
-        throw new UnauthorizedException("Basic token doesn't exist");
+    const decoded = this.decodeToken(token);
+    if (!decoded) {
+      throw new UnauthorizedException("Basic token doesn't exist");
+    }
 
-      const [username, password] = decoded.split(':');
+    const [username, password] = decoded.split(':');
 
-      const isValidUsername =
-        this.configService.get<string>('LOGIN') === username;
-      const isValidPassword =
-        this.configService.get<string>('PASSWORD') === password;
+    const isValidUsername =
+      this.configService.get<string>('LOGIN') === username;
+    const isValidPassword =
+      this.configService.get<string>('PASSWORD') === password;
 
-      if (!isValidUsername || !isValidPassword) {
-        throw new UnauthorizedException();
-      }
-    } catch {
+    if (!isValidUsername || !isValidPassword) {
       throw new UnauthorizedException();
     }
     return true;
